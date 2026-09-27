@@ -1,0 +1,11 @@
+{
+  "type": "preload-native",
+  "name": "Sound Physics Lite",
+  "author": "Ported for Levi",
+  "description": "FMOD low-pass with optional block line-of-sight raycast occlusion.",
+  "version": "0.9.0-raycast-1.26.51",
+  "entry": "libSoundPhysicsLite.so",
+  "icon": "icon.png",
+  "overwrite_files": [],
+  "overwrite_folders": []
+}
