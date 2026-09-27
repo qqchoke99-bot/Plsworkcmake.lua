@@ -1,1 +1,80 @@
+name: Build SPL.levipack (Android ARM64)
 
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-arm64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK / NDK / CMake / Ninja
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-28" "ndk;28.2.13676358" "cmake;3.22.1"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/28.2.13676358" >> "$GITHUB_ENV"
+
+      - name: Configure
+        shell: bash
+        run: |
+          cmake -S . -B build-arm64-v8a -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM=android-28 \
+            -DANDROID_STL=c++_shared \
+            -DMOD_ID=sound_physics_lite \
+            -DMOD_NAME="Sound Physics Lite" \
+            -DMOD_AUTHOR="Ported for Levi" \
+            -DMOD_VERSION=0.9.0-raycast \
+            -DMOD_LIBRARY_NAME=SoundPhysicsLite \
+            -DLEVI_CLIENT_SDK_INCLUDE="${GITHUB_WORKSPACE}/third_party/levi-client-sdk/include"
+
+      - name: Show raycast SDK status
+        shell: bash
+        run: |
+          if [ -f "third_party/levi-client-sdk/include/ll/api/service/TargetedBedrock.h" ] && \
+             [ -f "third_party/levi-client-sdk/include/mc/world/actor/player/Player.h" ]; then
+            echo "Levi client API headers found: native raycast will be compiled."
+          else
+            echo "WARNING: Levi client API headers are not present."
+            echo "The source contains the real Player::canSee raycast path, but this build will compile it out."
+            echo "Add the matching 1.26.x client SDK under third_party/levi-client-sdk/include/ to enable it."
+          fi
+
+      - name: Build
+        shell: bash
+        run: cmake --build build-arm64-v8a --target levi_package --parallel 2
+
+      - name: Verify package and ELF
+        shell: bash
+        run: |
+          test -f build-arm64-v8a/SPL.levipack
+          unzip -l build-arm64-v8a/SPL.levipack
+          unzip -p build-arm64-v8a/SPL.levipack SPL.levipack/libSoundPhysicsLite.so > /tmp/libSoundPhysicsLite.so
+          file /tmp/libSoundPhysicsLite.so
+          readelf -h /tmp/libSoundPhysicsLite.so | grep -E 'Class:|Machine:'
+
+      - name: Upload SPL.levipack
+        uses: actions/upload-artifact@v4
+        with:
+          name: SPL-levipack-arm64
+          path: build-arm64-v8a/SPL.levipack
+          if-no-files-found: error
