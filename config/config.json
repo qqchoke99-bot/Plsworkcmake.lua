@@ -1,1 +1,13 @@
-
+{
+  "enabled": true,
+  "debug_logging": true,
+  "enable_lowpass": true,
+  "lowpass_cutoff": 2000.0,
+  "attenuation_factor": 1.0,
+  "max_distance": 48.0,
+  "min_volume": 0.05,
+  "enable_volume": true,
+  "enable_raycast": true,
+  "occluded_lowpass_gain": 0.25,
+  "raycast_max_distance": 48.0
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "enabled": {"type":"boolean","title":"Enable Sound Physics","default":true},
+    "debug_logging": {"type":"boolean","title":"Debug Logging","default":true},
+    "enable_lowpass": {"type":"boolean","title":"Lowpass","default":true},
+    "lowpass_cutoff": {"type":"number","title":"Normal Lowpass Cutoff (Hz)","minimum":100,"maximum":22000,"default":2000},
+    "attenuation_factor": {"type":"number","title":"Attenuation Factor","minimum":0.1,"maximum":2.0,"default":1.0},
+    "max_distance": {"type":"number","title":"Max Distance","minimum":1,"maximum":128,"default":48},
+    "min_volume": {"type":"number","title":"Minimum Volume","minimum":0,"maximum":1,"default":0.05},
+    "enable_volume": {"type":"boolean","title":"Distance Volume","default":true},
+    "enable_raycast": {"type":"boolean","title":"Block Raycast","description":"Ray from listener to sound source; a blocked ray applies stronger lowpass.","default":true},
+    "occluded_lowpass_gain": {"type":"number","title":"Blocked Lowpass Gain","minimum":0,"maximum":1,"default":0.25},
+    "raycast_max_distance": {"type":"number","title":"Raycast Distance","minimum":1,"maximum":128,"default":48}
+  }
+}
